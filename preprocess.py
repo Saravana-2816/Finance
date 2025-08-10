@@ -119,8 +119,10 @@ class DataPreprocessor:
     
     def _is_potential_transaction_line(self, line: str) -> bool:
         """Determine if a text line potentially contains transaction data."""
-        if not line or len(line.strip()) < 10:
+        if not line or len(line.strip()) < 5:  # Reduced minimum length
             return False
+        
+        line_lower = line.lower().strip()
         
         # Skip obvious header/footer patterns
         skip_patterns = [
@@ -130,20 +132,11 @@ class DataPreprocessor:
             r'^balance forward',
             r'^opening balance',
             r'^closing balance',
+            r'^beginning balance',
+            r'^ending balance',
             r'^total',
             r'^\*+',
-            r'^-+$',
-            r'^=+$',
-        ]
-        
-        if any(re.search(pattern, line.lower()) for pattern in skip_patterns):
-            return False
-        
-        # Must contain at least a date pattern and an amount pattern
-        has_date = any(re.search(pattern, line) for pattern in self.date_patterns)
-        has_amount = re.search(self.amount_pattern, line)
-        
-        return has_date and has_amount
+            r'^-+']
     
     def normalize_date(self, date_str: str) -> str:
         """
